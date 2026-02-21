@@ -1,5 +1,6 @@
 # Laptop server (run on the computer to be controlled)
 pynput>=1.7.6
+pyautogui>=1.0.0
 # PyBluez from GitHub (PyPI 0.23 fails with modern setuptools: use_2to3 is invalid)
 PyBluez @ git+https://github.com/pybluez/pybluez.git ; sys_platform == "linux"
 

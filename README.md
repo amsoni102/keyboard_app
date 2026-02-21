@@ -41,18 +41,39 @@ To use a different venv folder: `./setup_venv.sh .venv`
 - Android device with Bluetooth
 - Built APK from the Kivy app (see below), or run the app on desktop with PyBluez for testing
 
+## Recommended: run on X11 (Xorg)
+
+For the phone to **control the laptop screen** (cursor and keys), the server needs to inject input. The reliable way on Ubuntu is **X11 + xdotool**:
+
+1. **Log out** of the desktop.
+2. On the **login screen**, open the **session** menu (gear/list) and choose **"Ubuntu on Xorg"** (or "GNOME on Xorg").
+3. **Log in**.
+4. Install dependencies and run the server:
+   ```bash
+   cd /home/pro/Desktop/app_keyboar_mouse_samsung
+   pip install pyautogui    # or: use venv and run ./run_server.sh (pyautogui in requirements.txt)
+   sudo apt install xdotool # optional; server tries pyautogui first
+   ./run_server.sh
+   ```
+5. You should see `>>> Input backend: pyautogui` or `xdotool (commands will control the screen)`. Then connect from the phone and the cursor/keys will work.
+
+You can also run **`./run_server_x11.sh`**: it runs the server when you're on X11, or prints instructions to switch to Xorg if you're on Wayland.
+
+To test screen control alone (no Bluetooth): run **`./venv/bin/python dummy_control.py`**. It uses **pyautogui** to move the mouse and type a line; if that works, the server will use the same method when you run `./run_server.sh`. You can force pyautogui with **`BACKEND=pyautogui ./run_server.sh`**.
+
+(On Wayland, input injection is unreliable without building ydotool from source and running its daemon; using Xorg or pyautogui avoids that.)
+
 ## Quick start
 
 ### 1. Run the server on the laptop
 
 ```bash
 cd /home/pro/Desktop/app_keyboar_mouse_samsung
-source venv/bin/activate   # if you use the venv from setup_venv.sh
-python laptop_server.py
+./run_server.sh
 ```
 
+- Use an **X11 session** (e.g. "Ubuntu on Xorg" at login) and **xdotool** (`sudo apt install xdotool`) so the phone can control the screen (see "Recommended: run on X11" above).
 - Make the laptop **discoverable** in Bluetooth settings (for first-time pairing).
-- Note the RFCOMM channel printed in the terminal (for reference).
 
 ### 2. Pair the laptop from the phone
 
@@ -117,13 +138,31 @@ Commands are one per line, UTF-8, newline-terminated:
 
 The server uses the standard SPP UUID `00001101-0000-1000-8000-00805F9B34FB` so the Android app can connect via RFCOMM.
 
+## Switching between Wayland and X11
+
+**Force a backend without changing session** (try the other injector on your current desktop):
+- Use **xdotool** (X11-style): `BACKEND=xdotool ./run_server.sh`
+- Use **ydotool** (Wayland-style): `BACKEND=ydotool ./run_server.sh`
+
+So you can try both: if you're on Wayland, run `BACKEND=xdotool ./run_server.sh` to try xdotool (may work with Xwayland); or `BACKEND=ydotool ./run_server.sh` to use ydotool.
+
+**Change the actual session** (Wayland vs X11) at login:
+1. Log out of the desktop.
+2. On the **login screen**, click the **gear** or **session** menu (often bottom-right).
+3. Choose **"Ubuntu on Xorg"** or **"GNOME on Xorg"** for **X11** (then xdotool will control the whole screen).
+4. Or choose the default (e.g. "Ubuntu" / "GNOME") for **Wayland** (then use ydotool).
+5. Log in. Run `./run_server.sh` as usual; the server will pick xdotool on X11 or ydotool on Wayland.
+
 ## Troubleshooting
 
 - **“Do you want to update?” then “App not installed / package appears to be invalid”**: The new APK is signed with a different key than the app already on the phone, so Android blocks the update. **Uninstall the existing Keyboard Mouse app** (Settings → Apps → Keyboard Mouse → Uninstall), then install the new `keyboardmouse.apk` as a fresh install.
 - **“Bluetooth not available” on phone**: Ensure the app has Bluetooth permissions (they are in `buildozer.spec`).
 - **“SPP service not found” / connection refused**: Start `laptop_server.py` on the laptop and make sure the laptop is paired from the phone.
 - **PyBluez install fails (Linux)**: Install `libbluetooth-dev` and `python3-dev`, then `pip install PyBluez` again.
-- **No input on laptop / nothing transmitted**: (1) Restart the server with `./run_server.sh` so it has access to your display (script passes `DISPLAY` for pynput). (2) When you use the app, watch the server terminal: you should see `Received: MOVE:...`, `Received: KEY:...` etc. If you see nothing, the phone is not sending or not connected (try Connect again, or re-pair the laptop). (3) If the app says "Connect failed", try again; some phones need a fallback (newer APK has it).
+- **No input on laptop / nothing transmitted**: (1) Use `./run_server.sh` (it starts the user process and the Bluetooth process with sudo). (2) When you use the app, watch the terminal: you should see `Received: MOVE:...`, `Received: KEY:...` etc. If you see nothing, the phone is not sending or not connected (try Connect again, or re-pair the laptop). (3) If the app says "Connect failed", try again; some phones need a fallback (newer APK has it).
+- **"Received: ..." in terminal but cursor/keys don't move / don't control the screen**: Depends on your session:
+  - **Wayland** (default on many Ubuntu): Install **ydotool** and start its daemon so the server can control the screen. Install: `sudo apt install ydotool` (or build from [ReimuNotMoe/ydotool](https://github.com/ReimuNotMoe/ydotool)). Start the daemon once (before or with the server): `ydotoold &` or `sudo ydotoold --socket-path=$HOME/.ydotool_socket &`. Then run `./run_server.sh`; you should see "Using ydotool to control keyboard/mouse (Wayland)".
+  - **X11** (e.g. "Ubuntu on Xorg"): Install **xdotool**: `sudo apt install xdotool`. Then run `./run_server.sh`; you should see "Using xdotool to control keyboard/mouse".
 - **“No such file or directory” when starting the server**: BlueZ needs compatibility mode and the Serial Port profile. Do this once:
   1. Edit the Bluetooth service: `sudo nano /lib/systemd/system/bluetooth.service` and change the `ExecStart` line so it ends with `bluetoothd -C` (add ` -C` after `bluetoothd`).
   2. Run: `sudo systemctl daemon-reload && sudo systemctl restart bluetooth`
