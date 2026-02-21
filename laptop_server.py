@@ -518,6 +518,14 @@ def run_user_server():
             conn, _ = sock.accept()
             log.info("Relay connected")
             buffer = b""
+            pending_dx, pending_dy = 0, 0  # batch consecutive MOVEs into one for lower latency
+
+            def flush_move():
+                nonlocal pending_dx, pending_dy
+                if pending_dx != 0 or pending_dy != 0:
+                    handle(CMD_MOUSE_MOVE, [f"{pending_dx},{pending_dy}"])
+                    pending_dx, pending_dy = 0, 0
+
             try:
                 while True:
                     data = conn.recv(4096)
@@ -539,8 +547,19 @@ def run_user_server():
                             continue
                         log.info("Received: %s", line_str)
                         parsed = parse_command(line_str)
-                        if parsed and not handle(parsed[0], parsed[1]):
-                            break
+                        if not parsed:
+                            continue
+                        cmd, args = parsed
+                        if cmd == CMD_MOUSE_MOVE and args and "," in args[0]:
+                            part = args[0].strip()
+                            dx, dy = part.split(",", 1)
+                            pending_dx += int(dx.strip())
+                            pending_dy += int(dy.strip())
+                        else:
+                            flush_move()
+                            if not handle(cmd, args):
+                                break
+                    flush_move()
             except (OSError, ConnectionResetError) as e:
                 log.info("Relay disconnected: %s", e)
             finally:

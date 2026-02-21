@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.OutputStream
 import java.util.UUID
+import java.util.concurrent.Executors
 
 // Same protocol as laptop server: one command per line, UTF-8, newline-terminated
 private val SPP_UUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
@@ -38,8 +39,11 @@ class MainActivity : AppCompatActivity() {
     private var hasMoved = false
 
     // Touchpad: faster cursor movement, less sensitive to jitter (dead zone)
-    private val touchpadSpeed = 2.8f
-    private val touchpadDeadZonePx = 3
+    private val touchpadSpeed = 3.5f
+    private val touchpadDeadZonePx = 2
+
+    // Send on background thread so Bluetooth write never blocks touch (reduces latency)
+    private val sendExecutor = Executors.newSingleThreadExecutor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,10 +126,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun send(line: String) {
-        try {
-            output?.write((line + "\n").toByteArray(Charsets.UTF_8))
-            output?.flush()
-        } catch (_: Exception) { }
+        sendExecutor.execute {
+            try {
+                output?.write((line + "\n").toByteArray(Charsets.UTF_8))
+                output?.flush()
+            } catch (_: Exception) { }
+        }
     }
 
     private fun setupTouchPad() {
@@ -202,6 +208,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        sendExecutor.shutdown()
         try { socket?.close() } catch (_: Exception) { }
         super.onDestroy()
     }
