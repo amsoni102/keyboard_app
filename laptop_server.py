@@ -4,6 +4,7 @@ Bluetooth server that runs on the laptop. Listens for connections from the
 mobile app and controls keyboard and mouse using pynput.
 """
 
+import socket
 import sys
 import logging
 
@@ -106,8 +107,10 @@ def handle_command(cmd: str, args: list[str]) -> bool:
 
 
 def run_server(port: int | None = None):
+    # Use channel 1 so Android fallback (createRfcommSocket(1)) can connect if SDP fails
     server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-    server_sock.bind(("", port or bluetooth.PORT_ANY))
+    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_sock.bind(("", port if port is not None else 1))
     server_sock.listen(1)
 
     channel = server_sock.getsockname()[1]
@@ -175,6 +178,9 @@ def run_server(port: int | None = None):
                             line_str = line.decode("utf-8").strip()
                         except UnicodeDecodeError:
                             continue
+                        if not line_str:
+                            continue
+                        log.info("Received: %s", line_str)
                         parsed = parse_command(line_str)
                         if parsed and not handle_command(parsed[0], parsed[1]):
                             break

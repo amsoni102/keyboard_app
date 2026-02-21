@@ -61,10 +61,11 @@ python laptop_server.py
 
 ### 3. Run the app on the phone
 
-- **Recommended — Native APK** (if the Kivy app crashes with “Loading…”):
+- **Recommended — Native APK** (for normal use; use this if the Kivy app crashes):
 
-  - Use the pre-built **native** APK: **`keyboardmouse-native-debug.apk`** (in the project root). Install it on the phone and open the app. Same protocol and UI idea as the Kivy app; no Python on the device.
-  - To rebuild it: open the `android_app/` folder in Android Studio and Run, or see `android_app/README.md`.
+  - **`keyboardmouse.apk`** (project root) — release build for everyday use (~700 KB). Install on the phone and open the app.
+  - For testing in browser emulators: **`keyboardmouse-native-debug.apk`** (debug build, larger). Same app; release is smaller and optimized.
+  - To rebuild: open `android_app/` in Android Studio and Run, or see `android_app/README.md`.
 
 - **Option A — Kivy APK** (Python/Buildozer):
 
@@ -79,7 +80,7 @@ buildozer android debug
 - **Option B — Simulate on desktop** (same UI, no phone): run `./run_desktop.sh` (needs venv + Kivy; BT uses PyBluez).
 - **Option C — Android emulator**: create an AVD in Android Studio, then run `./run_emulator.sh` to start emulator, install APK, and launch the app.
 
-- **Option D — Run APK in browser (no install)**: use a web-based Android emulator. **APK to upload:** `keyboardmouse-native-debug.apk` (in the project root). Open one of these sites, upload that file, and run the app in the browser:
+- **Option D — Run APK in browser (no install)**: use a web-based Android emulator. **APK to upload:** `keyboardmouse.apk` or `keyboardmouse-native-debug.apk` (in the project root). Open one of these sites, upload the file, and run the app in the browser:
   - **[Appetize.io](https://appetize.io)** — Upload APK, 100 min/month free.
   - **[ApkOnline](https://apkonline.net/)** — Upload and run APK in browser.
   - **[Browserling](https://www.browserling.com/browse/android)** — Free short sessions.
@@ -118,10 +119,11 @@ The server uses the standard SPP UUID `00001101-0000-1000-8000-00805F9B34FB` so 
 
 ## Troubleshooting
 
+- **“Do you want to update?” then “App not installed / package appears to be invalid”**: The new APK is signed with a different key than the app already on the phone, so Android blocks the update. **Uninstall the existing Keyboard Mouse app** (Settings → Apps → Keyboard Mouse → Uninstall), then install the new `keyboardmouse.apk` as a fresh install.
 - **“Bluetooth not available” on phone**: Ensure the app has Bluetooth permissions (they are in `buildozer.spec`).
 - **“SPP service not found” / connection refused**: Start `laptop_server.py` on the laptop and make sure the laptop is paired from the phone.
 - **PyBluez install fails (Linux)**: Install `libbluetooth-dev` and `python3-dev`, then `pip install PyBluez` again.
-- **No input on laptop**: On Linux, the server may need to run in an X/Wayland session (not over SSH without X) so that `pynput` can control the keyboard and mouse.
+- **No input on laptop / nothing transmitted**: (1) Restart the server with `./run_server.sh` so it has access to your display (script passes `DISPLAY` for pynput). (2) When you use the app, watch the server terminal: you should see `Received: MOVE:...`, `Received: KEY:...` etc. If you see nothing, the phone is not sending or not connected (try Connect again, or re-pair the laptop). (3) If the app says "Connect failed", try again; some phones need a fallback (newer APK has it).
 - **“No such file or directory” when starting the server**: BlueZ needs compatibility mode and the Serial Port profile. Do this once:
   1. Edit the Bluetooth service: `sudo nano /lib/systemd/system/bluetooth.service` and change the `ExecStart` line so it ends with `bluetoothd -C` (add ` -C` after `bluetoothd`).
   2. Run: `sudo systemctl daemon-reload && sudo systemctl restart bluetooth`

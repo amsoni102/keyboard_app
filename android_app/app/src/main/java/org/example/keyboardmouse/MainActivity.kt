@@ -103,7 +103,14 @@ class MainActivity : AppCompatActivity() {
         try {
             socket?.close()
             val device: BluetoothDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(addr)
-            socket = device.createRfcommSocketToServiceRecord(SPP_UUID).apply { connect() }
+            try {
+                socket = device.createRfcommSocketToServiceRecord(SPP_UUID).apply { connect() }
+            } catch (e: Exception) {
+                // Fallback: some devices need channel 1 explicitly to connect to Linux BlueZ SPP
+                val m = device.javaClass.getMethod("createRfcommSocket", Int::class.javaPrimitiveType)
+                socket = m.invoke(device, 1) as BluetoothSocket
+                (socket as BluetoothSocket).connect()
+            }
             output = socket?.outputStream
             statusText?.text = "Connected to $addr"
         } catch (e: Exception) {
