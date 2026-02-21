@@ -13,8 +13,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -37,6 +36,10 @@ class MainActivity : AppCompatActivity() {
     private var touchStartX = 0f
     private var touchStartY = 0f
     private var hasMoved = false
+
+    // Touchpad: faster cursor movement, less sensitive to jitter (dead zone)
+    private val touchpadSpeed = 2.8f
+    private val touchpadDeadZonePx = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,13 +138,18 @@ class MainActivity : AppCompatActivity() {
                     hasMoved = false
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    val dx = (event.x - touchStartX).toInt()
-                    val dy = -(event.y - touchStartY).toInt()
+                    val rawDx = event.x - touchStartX
+                    val rawDy = -(event.y - touchStartY)
                     touchStartX = event.x
                     touchStartY = event.y
-                    if (dx != 0 || dy != 0) {
+                    // Dead zone: ignore tiny movements (less sensitive to jitter)
+                    val dx = if (kotlin.math.abs(rawDx) < touchpadDeadZonePx) 0f else rawDx * touchpadSpeed
+                    val dy = if (kotlin.math.abs(rawDy) < touchpadDeadZonePx) 0f else rawDy * touchpadSpeed
+                    val ix = dx.toInt()
+                    val iy = dy.toInt()
+                    if (ix != 0 || iy != 0) {
                         hasMoved = true
-                        send("MOVE:$dx,$dy")
+                        send("MOVE:$ix,$iy")
                     }
                 }
                 MotionEvent.ACTION_UP -> {
@@ -153,15 +161,50 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupKeys() {
-        val keys = listOf(
-            "Backspace" to "backspace", "Enter" to "enter", "Tab" to "tab", "Esc" to "escape",
-            "Up" to "up", "Down" to "down", "Left" to "left", "Right" to "right"
-        )
-        keys.forEach { (label, key) ->
-            findViewById<Button>(resources.getIdentifier("key_${key}", "id", packageName)).setOnClickListener { send("KEY:$key") }
-        }
+        // Mouse & Enter
+        findViewById<Button>(R.id.key_left_click).setOnClickListener { send("CLICK:left") }
+        findViewById<Button>(R.id.key_enter).setOnClickListener { send("KEY:enter") }
+        // Arrows
+        findViewById<Button>(R.id.key_up).setOnClickListener { send("KEY:up") }
+        findViewById<Button>(R.id.key_down).setOnClickListener { send("KEY:down") }
+        findViewById<Button>(R.id.key_left).setOnClickListener { send("KEY:left") }
+        findViewById<Button>(R.id.key_right).setOnClickListener { send("KEY:right") }
+        // Other keys
+        findViewById<Button>(R.id.key_backspace).setOnClickListener { send("KEY:backspace") }
+        findViewById<Button>(R.id.key_tab).setOnClickListener { send("KEY:tab") }
+        findViewById<Button>(R.id.key_escape).setOnClickListener { send("KEY:escape") }
         findViewById<Button>(R.id.scroll_up).setOnClickListener { send("SCROLL:2") }
         findViewById<Button>(R.id.scroll_down).setOnClickListener { send("SCROLL:-2") }
+        // Letter keys A–Z (send KEY:x when pressed)
+        setupLetterKeys()
+    }
+
+    private fun setupLetterKeys() {
+        val container = findViewById<LinearLayout>(R.id.letter_keys_container)
+        val letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        val cols = 9
+        var row: LinearLayout? = null
+        letters.forEachIndexed { i, c ->
+            if (i % cols == 0) {
+                row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { setMargins(0, 2, 0, 2) }
+                }
+                container.addView(row)
+            }
+            val ch = c.lowercaseChar()
+            val btn = Button(this).apply {
+                text = c.toString()
+                setOnClickListener { send("KEY:$ch") }
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    setMargins(2, 0, 2, 0)
+                }
+            }
+            row?.addView(btn)
+        }
     }
 
     override fun onDestroy() {

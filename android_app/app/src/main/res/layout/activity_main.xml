@@ -42,34 +42,33 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Touch pad (tap = click)"
+            android:text="Touch pad (tap = left click)"
             android:paddingTop="8dp" />
         <View
             android:id="@+id/touch_pad"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
+            android:layout_height="160dp"
             android:background="#E0E0E0"
             android:padding="4dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Keys"
+            android:text="Mouse &amp; Enter"
             android:paddingTop="8dp" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-            <Button android:id="@+id/key_backspace" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Backspace" />
+            <Button android:id="@+id/key_left_click" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Left Click" />
             <Button android:id="@+id/key_enter"     android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Enter" />
         </LinearLayout>
-        <LinearLayout
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button android:id="@+id/key_tab"    android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tab" />
-            <Button android:id="@+id/key_escape" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Esc" />
-        </LinearLayout>
+            android:text="Arrows"
+            android:paddingTop="4dp" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -78,6 +77,31 @@
             <Button android:id="@+id/key_down" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Down" />
             <Button android:id="@+id/key_left"  android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Left" />
             <Button android:id="@+id/key_right" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Right" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Letters"
+            android:paddingTop="4dp" />
+        <LinearLayout
+            android:id="@+id/letter_keys_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Other keys"
+            android:paddingTop="4dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button android:id="@+id/key_backspace" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Backspace" />
+            <Button android:id="@+id/key_tab"       android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tab" />
+            <Button android:id="@+id/key_escape"    android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Esc" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"

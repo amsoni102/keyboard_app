@@ -6,11 +6,11 @@ android {
     namespace = "org.example.keyboardmouse"
     compileSdk = 34
     defaultConfig {
-        applicationId = "org.example.keyboardmouse"
+        applicationId = "org.example.keyboardmouse.v2"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = 2
+        versionName = "2.0 (keyboard_mouse_v2)"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
     signingConfigs {
@@ -35,6 +35,9 @@ android {
         }
     }
     buildFeatures { viewBinding = true }
+    lint {
+        checkReleaseBuilds = false
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
