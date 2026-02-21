@@ -1,0 +1,9 @@
+# Laptop server (run on the computer to be controlled)
+pynput>=1.7.6
+# PyBluez from GitHub (PyPI 0.23 fails with modern setuptools: use_2to3 is invalid)
+PyBluez @ git+https://github.com/pybluez/pybluez.git ; sys_platform == "linux"
+
+# Mobile app (Kivy for Android build)
+# Install in a separate venv when building APK:
+# kivy>=2.2.0
+# buildozer  # for building Android APK

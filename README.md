@@ -61,7 +61,12 @@ python laptop_server.py
 
 ### 3. Run the app on the phone
 
-- **Option A — Build Android APK** (recommended):
+- **Recommended — Native APK** (if the Kivy app crashes with “Loading…”):
+
+  - Use the pre-built **native** APK: **`keyboardmouse-native-debug.apk`** (in the project root). Install it on the phone and open the app. Same protocol and UI idea as the Kivy app; no Python on the device.
+  - To rebuild it: open the `android_app/` folder in Android Studio and Run, or see `android_app/README.md`.
+
+- **Option A — Kivy APK** (Python/Buildozer):
 
 ```bash
 cd mobile_app
@@ -69,10 +74,16 @@ pip install buildozer
 buildozer android debug
 ```
 
-- APK will be under `mobile_app/bin/`. Install it on the phone and open the app.
+- APK will be under `mobile_app/bin/`. Install it on the phone and open the app. If it crashes on startup, use the native APK above.
 
 - **Option B — Simulate on desktop** (same UI, no phone): run `./run_desktop.sh` (needs venv + Kivy; BT uses PyBluez).
 - **Option C — Android emulator**: create an AVD in Android Studio, then run `./run_emulator.sh` to start emulator, install APK, and launch the app.
+
+- **Option D — Run APK in browser (no install)**: use a web-based Android emulator. **APK to upload:** `keyboardmouse-native-debug.apk` (in the project root). Open one of these sites, upload that file, and run the app in the browser:
+  - **[Appetize.io](https://appetize.io)** — Upload APK, 100 min/month free.
+  - **[ApkOnline](https://apkonline.net/)** — Upload and run APK in browser.
+  - **[Browserling](https://www.browserling.com/browse/android)** — Free short sessions.
+  Bluetooth will not work in the browser; you can still check that the app opens and the UI (device list, touch pad, keys) loads.
 
 - **Option B (legacy) — Test on desktop** (same machine or another PC with Bluetooth):
 
