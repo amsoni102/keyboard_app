@@ -241,6 +241,7 @@ def _handle_command_pyautogui(cmd: str, args: list[str]) -> bool:
     """Inject key/mouse via pyautogui (often works where xdotool/ydotool fail)."""
     try:
         import pyautogui
+        pyautogui.FAILSAFE = False  # allow remote control without corner trigger
         if cmd == CMD_KEY:
             if not args:
                 return True

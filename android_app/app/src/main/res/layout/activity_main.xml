@@ -90,25 +90,5 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Other keys"
-            android:paddingTop="4dp" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button android:id="@+id/key_backspace" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Backspace" />
-            <Button android:id="@+id/key_tab"       android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tab" />
-            <Button android:id="@+id/key_escape"    android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Esc" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button android:id="@+id/scroll_up"   android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Scroll Up" />
-            <Button android:id="@+id/scroll_down" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Scroll Down" />
-        </LinearLayout>
     </LinearLayout>
 </ScrollView>

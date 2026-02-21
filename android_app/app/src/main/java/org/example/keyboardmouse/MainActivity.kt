@@ -169,12 +169,6 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.key_down).setOnClickListener { send("KEY:down") }
         findViewById<Button>(R.id.key_left).setOnClickListener { send("KEY:left") }
         findViewById<Button>(R.id.key_right).setOnClickListener { send("KEY:right") }
-        // Other keys
-        findViewById<Button>(R.id.key_backspace).setOnClickListener { send("KEY:backspace") }
-        findViewById<Button>(R.id.key_tab).setOnClickListener { send("KEY:tab") }
-        findViewById<Button>(R.id.key_escape).setOnClickListener { send("KEY:escape") }
-        findViewById<Button>(R.id.scroll_up).setOnClickListener { send("SCROLL:2") }
-        findViewById<Button>(R.id.scroll_down).setOnClickListener { send("SCROLL:-2") }
         // Letter keys A–Z (send KEY:x when pressed)
         setupLetterKeys()
     }
